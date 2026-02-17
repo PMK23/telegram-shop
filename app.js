@@ -6,10 +6,8 @@ tg.ready();
 // Состояние приложения
 const state = {
     user: null,
-    categories: [],
     products: [],
     cart: [],
-    currentCategory: null,
     searchQuery: '',
     orders: []
 };
@@ -42,13 +40,6 @@ function initUser() {
             localStorage.setItem('olmi_user', JSON.stringify(state.user));
         }
     }
-    
-    updateUserInterface();
-}
-
-function updateUserInterface() {
-    document.getElementById('userName').textContent = 'OLMI CONNECT';
-    document.getElementById('userStatus').textContent = 'оборудование';
 }
 
 // ============================================
@@ -56,14 +47,8 @@ function updateUserInterface() {
 // ============================================
 async function loadData() {
     try {
-        console.log('Загрузка данных...');
         const response = await fetch('products.json');
         const data = await response.json();
-        
-        console.log('Данные загружены:', data);
-        
-        // Загружаем категории
-        state.categories = data.categories;
         
         // Загружаем товары
         state.products = data.products.map(product => {
@@ -71,7 +56,7 @@ async function loadData() {
             const hash = product.name.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
             const price = 500 + (hash % 9500);
             
-            // Находим категорию товара
+            // Находим категорию для изображения
             const category = data.categories.find(c => c.url === product.category_url);
             
             return {
@@ -81,13 +66,6 @@ async function loadData() {
             };
         });
         
-        console.log('Товаров загружено:', state.products.length);
-        console.log('Категорий загружено:', state.categories.length);
-        
-        // Показываем все товары по умолчанию
-        state.currentCategory = null;
-        
-        renderCategories();
         renderProducts();
         updateProductCount();
         
@@ -97,80 +75,14 @@ async function loadData() {
 }
 
 // ============================================
-// КАТЕГОРИИ
-// ============================================
-function renderCategories() {
-    const grid = document.getElementById('categoriesGrid');
-    
-    // Берем только корневые категории (level 1)
-    const rootCategories = state.categories.filter(c => c.level === 1);
-    
-    console.log('Корневые категории:', rootCategories);
-    
-    grid.innerHTML = rootCategories.map(cat => {
-        // Считаем товары в этой категории
-        const productCount = state.products.filter(p => p.category_url === cat.url).length;
-        
-        return `
-            <div class="category-card ${state.currentCategory === cat.url ? 'active' : ''}" 
-                 onclick="selectCategory('${cat.url}')">
-                <div class="category-icon">📦</div>
-                <div class="category-name">${cat.name}</div>
-                <div class="category-count">${productCount} шт</div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Показать все категории
-window.showAllCategories = function() {
-    console.log('Показать все категории');
-    state.currentCategory = null;
-    document.getElementById('currentCategoryTitle').textContent = 'ВСЕ ТОВАРЫ';
-    renderCategories();
-    renderProducts();
-    updateProductCount();
-};
-
-// Выбрать категорию
-window.selectCategory = function(categoryUrl) {
-    console.log('Выбрана категория:', categoryUrl);
-    
-    const category = state.categories.find(c => c.url === categoryUrl);
-    if (!category) return;
-    
-    state.currentCategory = categoryUrl;
-    document.getElementById('currentCategoryTitle').textContent = category.name.toUpperCase();
-    renderCategories();
-    renderProducts();
-    updateProductCount();
-};
-
-// Обновить счетчик товаров
-function updateProductCount() {
-    let count = state.products.length;
-    if (state.currentCategory) {
-        count = state.products.filter(p => p.category_url === state.currentCategory).length;
-    }
-    document.getElementById('productCount').textContent = `${count} шт`;
-}
-
-// ============================================
 // ТОВАРЫ
 // ============================================
 function renderProducts() {
     const grid = document.getElementById('productsGrid');
     
-    // Фильтруем товары
+    // Фильтруем по поиску
     let filteredProducts = [...state.products];
     
-    // Фильтр по категории
-    if (state.currentCategory) {
-        filteredProducts = filteredProducts.filter(p => p.category_url === state.currentCategory);
-        console.log(`Товаров в категории ${state.currentCategory}:`, filteredProducts.length);
-    }
-    
-    // Фильтр по поиску
     if (state.searchQuery) {
         const query = state.searchQuery.toLowerCase();
         filteredProducts = filteredProducts.filter(p => 
@@ -179,20 +91,18 @@ function renderProducts() {
         );
     }
     
-    console.log('Всего товаров для отображения:', filteredProducts.length);
-    
     if (filteredProducts.length === 0) {
         grid.innerHTML = `
-            <div style="grid-column: span 2; text-align: center; padding: 40px; color: #666;">
-                <div style="font-size: 32px; margin-bottom: 16px;">📦</div>
-                <p>Нет товаров</p>
+            <div style="grid-column: span 2; text-align: center; padding: 60px 20px; color: #666;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <p>Ничего не найдено</p>
             </div>
         `;
         return;
     }
     
     grid.innerHTML = filteredProducts.map(product => {
-        // Обрезаем название до 50 символов
+        // Обрезаем название
         const shortName = product.name.length > 50 
             ? product.name.substring(0, 50) + '...' 
             : product.name;
@@ -209,7 +119,7 @@ function renderProducts() {
                     <div class="product-footer">
                         <span class="product-price">${product.price.toLocaleString()} ₽</span>
                         <button class="add-btn" onclick="addToCart(event, '${product.url}')">
-                            +
+                            + В корзину
                         </button>
                     </div>
                 </div>
@@ -218,12 +128,22 @@ function renderProducts() {
     }).join('');
 }
 
+function updateProductCount() {
+    let count = state.products.length;
+    if (state.searchQuery) {
+        const query = state.searchQuery.toLowerCase();
+        count = state.products.filter(p => 
+            p.name.toLowerCase().includes(query) || 
+            p.category.toLowerCase().includes(query)
+        ).length;
+    }
+    document.getElementById('productCount').textContent = `${count} шт`;
+}
+
 // ============================================
 // ТОВАР ДЕТАЛЬНО
 // ============================================
 window.openProduct = function(productUrl) {
-    console.log('Открыть товар:', productUrl);
-    
     const product = state.products.find(p => p.url === productUrl);
     if (!product) return;
     
@@ -278,7 +198,7 @@ window.addToCart = function(event, productUrl) {
     
     updateCartBadge();
     saveCart();
-    showToast('Товар добавлен');
+    showToast('Товар добавлен в корзину');
 };
 
 function updateCartBadge() {
@@ -305,7 +225,10 @@ function loadCart() {
     }
 }
 
-window.openCart = function() {
+// Открыть корзину
+document.getElementById('cartBtn').addEventListener('click', openCart);
+
+function openCart() {
     const modal = document.getElementById('cartModal');
     const content = document.getElementById('cartContent');
     
@@ -327,11 +250,11 @@ window.openCart = function() {
                             <img src="${item.image}" alt="${item.name}">
                         </div>
                         <div class="cart-item-details">
-                            <div class="cart-item-title">${item.name.substring(0, 30)}...</div>
+                            <div class="cart-item-title">${item.name.substring(0, 40)}...</div>
                             <div class="cart-item-price">${item.price.toLocaleString()} ₽</div>
                             <div class="cart-item-quantity">
                                 <button class="qty-btn" onclick="updateQuantity('${item.url}', -1)">−</button>
-                                <span style="min-width: 20px; text-align: center;">${item.quantity}</span>
+                                <span style="min-width: 24px; text-align: center;">${item.quantity}</span>
                                 <button class="qty-btn" onclick="updateQuantity('${item.url}', 1)">+</button>
                                 <button class="qty-btn" onclick="removeFromCart('${item.url}')" style="margin-left: 8px;">✕</button>
                             </div>
@@ -352,11 +275,12 @@ window.openCart = function() {
     }
     
     modal.style.display = 'flex';
-};
+}
 
-window.closeCart = function() {
+// Закрыть корзину
+document.getElementById('closeCartBtn').addEventListener('click', function() {
     document.getElementById('cartModal').style.display = 'none';
-};
+});
 
 window.updateQuantity = function(productUrl, delta) {
     const index = state.cart.findIndex(item => item.url === productUrl);
@@ -414,61 +338,76 @@ function checkout() {
     state.cart = [];
     updateCartBadge();
     saveCart();
-    closeCart();
+    document.getElementById('cartModal').style.display = 'none';
     
-    showToast('Заказ оформлен');
+    showToast('✓ Заказ оформлен');
 }
 
 // ============================================
 // ПРОФИЛЬ
 // ============================================
-window.openProfile = function() {
+document.getElementById('profileBtn').addEventListener('click', openProfile);
+
+function openProfile() {
     const modal = document.getElementById('profileModal');
     const content = document.getElementById('profileContent');
     
     const ordersCount = state.orders.length;
     const totalSpent = state.orders.reduce((sum, order) => sum + order.total, 0);
+    const cartCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+    
+    let ordersHtml = '';
+    if (ordersCount > 0) {
+        ordersHtml = state.orders.slice(-5).map(order => `
+            <div class="order-item">
+                <div class="order-header">
+                    <span class="order-id">#${order.id}</span>
+                    <span class="order-total">${order.total.toLocaleString()} ₽</span>
+                </div>
+                <div class="order-date">${order.date}</div>
+            </div>
+        `).join('');
+    } else {
+        ordersHtml = '<p style="color: #666; text-align: center;">Нет заказов</p>';
+    }
     
     content.innerHTML = `
         <div style="text-align: center; margin-bottom: 24px;">
-            <div style="width: 64px; height: 64px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px; color: #888; border: 1px solid #2a2a2a;">
+            <div style="width: 70px; height: 70px; background: #1a1a1a; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px; color: #888; border: 1px solid #2a2a2a;">
                 OL
             </div>
             <h3 style="margin-bottom: 4px; color: #fff;">OLMI CONNECT</h3>
-            <p style="color: #888; font-size: 13px;">оборудование</p>
+            <p style="color: #888; font-size: 13px;">телекоммуникационное оборудование</p>
         </div>
         
-        <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="color: #888;">Заказов:</span>
-                <span style="color: #fff; font-weight: 600;">${ordersCount}</span>
+        <div class="profile-stats">
+            <div class="profile-stat-item">
+                <span class="profile-stat-label">Всего заказов</span>
+                <span class="profile-stat-value">${ordersCount}</span>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span style="color: #888;">Сумма:</span>
-                <span style="color: #fff; font-weight: 600;">${totalSpent.toLocaleString()} ₽</span>
+            <div class="profile-stat-item">
+                <span class="profile-stat-label">Сумма покупок</span>
+                <span class="profile-stat-value">${totalSpent.toLocaleString()} ₽</span>
+            </div>
+            <div class="profile-stat-item">
+                <span class="profile-stat-label">В корзине</span>
+                <span class="profile-stat-value">${cartCount} шт</span>
             </div>
         </div>
         
-        <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px;">
-            <h4 style="margin-bottom: 12px; color: #fff; font-size: 14px;">ИСТОРИЯ ЗАКАЗОВ</h4>
-            ${ordersCount > 0 ? state.orders.slice(-3).map(order => `
-                <div style="padding: 8px 0; border-bottom: 1px solid #2a2a2a;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #888; font-size: 13px;">#${order.id}</span>
-                        <span style="color: #fff;">${order.total.toLocaleString()} ₽</span>
-                    </div>
-                    <div style="font-size: 11px; color: #666;">${order.date}</div>
-                </div>
-            `).join('') : '<p style="color: #666; text-align: center;">Нет заказов</p>'}
+        <div class="orders-list">
+            <div class="orders-title">ИСТОРИЯ ЗАКАЗОВ</div>
+            ${ordersHtml}
         </div>
     `;
     
     modal.style.display = 'flex';
-};
+}
 
-window.closeProfile = function() {
+// Закрыть профиль
+document.getElementById('closeProfileBtn').addEventListener('click', function() {
     document.getElementById('profileModal').style.display = 'none';
-};
+});
 
 // ============================================
 // ПОИСК
@@ -493,21 +432,19 @@ function showToast(message) {
 }
 
 // ============================================
+// ЗАКРЫТИЕ МОДАЛЬНЫХ ОКОН ПО КЛИКУ ВНЕ
+// ============================================
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
+    }
+});
+
+// ============================================
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Приложение запущено');
     initUser();
     loadCart();
     loadData();
-    
-    // Клик по аватарке
-    document.getElementById('userInfo').addEventListener('click', openProfile);
-    
-    // Закрытие модальных окон
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            e.target.style.display = 'none';
-        }
-    });
 });
