@@ -15,39 +15,29 @@ const state = {
 };
 
 // ============================================
-// ИМИТАЦИЯ РЕГИСТРАЦИИ (используем данные Telegram)
+// ИНИЦИАЛИЗАЦИЯ ПОЛЬЗОВАТЕЛЯ
 // ============================================
 function initUser() {
-    // Пробуем получить данные из Telegram
     const tgUser = tg.initDataUnsafe?.user;
     
     if (tgUser) {
-        // Пользователь зашел через Telegram - он уже "авторизован"
         state.user = {
             id: tgUser.id,
             firstName: tgUser.first_name,
             lastName: tgUser.last_name || '',
             username: tgUser.username,
-            photoUrl: null,
-            registered: true,
-            registrationDate: new Date().toLocaleDateString()
+            registered: true
         };
     } else {
-        // Имитация регистрации для тестирования
         const savedUser = localStorage.getItem('olmi_user');
         if (savedUser) {
             state.user = JSON.parse(savedUser);
         } else {
-            // Создаем "гостевого" пользователя
             state.user = {
                 id: 'guest_' + Math.random().toString(36).substr(2, 9),
                 firstName: 'Гость',
                 lastName: '',
-                username: null,
-                photoUrl: null,
-                registered: false,
-                visitCount: 1,
-                firstVisit: new Date().toLocaleDateString()
+                registered: false
             };
             localStorage.setItem('olmi_user', JSON.stringify(state.user));
         }
@@ -56,262 +46,184 @@ function initUser() {
     updateUserInterface();
 }
 
-// Обновление интерфейса пользователя
 function updateUserInterface() {
-    const userNameEl = document.getElementById('userName');
-    const userStatusEl = document.getElementById('userStatus');
-    const userAvatarEl = document.getElementById('userAvatar');
-    
-    if (state.user.registered) {
-        userNameEl.textContent = `${state.user.firstName} ${state.user.lastName}`.trim();
-        userStatusEl.textContent = 'постоянный покупатель';
-        userAvatarEl.textContent = state.user.firstName.charAt(0).toUpperCase();
-    } else {
-        userNameEl.textContent = 'Гость';
-        userStatusEl.textContent = 'не авторизован';
-    }
+    document.getElementById('userName').textContent = 'OLMI CONNECT';
+    document.getElementById('userStatus').textContent = 'оборудование';
 }
 
-// Открыть профиль
-window.openProfile = function() {
-    const modal = document.getElementById('profileModal');
-    const content = document.getElementById('profileContent');
-    
-    const ordersCount = state.orders.length;
-    const cartCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
-    const totalSpent = state.orders.reduce((sum, order) => sum + order.total, 0);
-    
-    let profileHtml = '';
-    
-    if (state.user.registered) {
-        profileHtml = `
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; color: white;">
-                    ${state.user.firstName.charAt(0).toUpperCase()}
-                </div>
-                <h3 style="margin-bottom: 4px;">${state.user.firstName} ${state.user.lastName}</h3>
-                <p style="color: #667eea; font-size: 14px;">ID: ${state.user.id}</p>
-            </div>
-            
-            <div style="background: #f8f9fa; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span>Всего заказов:</span>
-                    <span style="font-weight: 600;">${ordersCount}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span>Сумма покупок:</span>
-                    <span style="font-weight: 600; color: #667eea;">${totalSpent.toLocaleString()} ₽</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Товаров в корзине:</span>
-                    <span style="font-weight: 600;">${cartCount}</span>
-                </div>
-            </div>
-            
-            <div style="background: #f8f9fa; border-radius: 12px; padding: 16px;">
-                <h4 style="margin-bottom: 12px;">История заказов</h4>
-                ${ordersCount > 0 ? state.orders.slice(-3).map(order => `
-                    <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span>Заказ #${order.id}</span>
-                            <span style="color: #667eea;">${order.total.toLocaleString()} ₽</span>
-                        </div>
-                        <div style="font-size: 12px; color: #999;">${order.date}</div>
-                    </div>
-                `).join('') : '<p style="color: #999; text-align: center;">У вас пока нет заказов</p>'}
-            </div>
-        `;
-    } else {
-        profileHtml = `
-            <div style="text-align: center; margin-bottom: 30px;">
-                <div style="font-size: 64px; margin-bottom: 16px;">👤</div>
-                <h3 style="margin-bottom: 8px;">Гостевой режим</h3>
-                <p style="color: #666; margin-bottom: 20px;">Войдите через Telegram, чтобы сохранять историю заказов</p>
-                <button class="checkout-btn" onclick="simulateRegistration()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    Войти через Telegram
-                </button>
-            </div>
-            
-            <div style="background: #f8f9fa; border-radius: 12px; padding: 16px;">
-                <h4 style="margin-bottom: 8px;">Статистика посещений</h4>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Визитов:</span>
-                    <span>${state.user.visitCount}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Первый визит:</span>
-                    <span>${state.user.firstVisit}</span>
-                </div>
-            </div>
-        `;
-    }
-    
-    content.innerHTML = profileHtml;
-    modal.style.display = 'flex';
-};
-
-// Имитация регистрации
-window.simulateRegistration = function() {
-    state.user = {
-        id: 'user_' + Math.random().toString(36).substr(2, 9),
-        firstName: 'Алексей',
-        lastName: 'Петров',
-        username: 'alex_' + Math.floor(Math.random() * 1000),
-        photoUrl: null,
-        registered: true,
-        registrationDate: new Date().toLocaleDateString()
-    };
-    
-    localStorage.setItem('olmi_user', JSON.stringify(state.user));
-    updateUserInterface();
-    closeProfile();
-    showToast('✓ Вы успешно зарегистрированы!');
-};
-
-// Закрыть профиль
-window.closeProfile = function() {
-    document.getElementById('profileModal').style.display = 'none';
-};
-
 // ============================================
-// ЗАГРУЗКА ДАННЫХ
+// ЗАГРУЗКА ДАННЫХ ИЗ JSON
 // ============================================
 async function loadData() {
     try {
+        console.log('Загрузка данных...');
         const response = await fetch('products.json');
         const data = await response.json();
+        
+        console.log('Данные загружены:', data);
         
         // Загружаем категории
         state.categories = data.categories;
         
-        // Загружаем товары и добавляем цены
+        // Загружаем товары
         state.products = data.products.map(product => {
-            // Генерируем цену на основе названия (для имитации)
+            // Генерируем цену
             const hash = product.name.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
             const price = 500 + (hash % 9500);
             
+            // Находим категорию товара
+            const category = data.categories.find(c => c.url === product.category_url);
+            
             return {
                 ...product,
-                price: Math.round(price / 100) * 100, // Округляем до сотен
-                image: getProductImage(product)
+                price: Math.round(price / 100) * 100,
+                image: category?.image_url || product.image_url || 'https://via.placeholder.com/200'
             };
         });
         
+        console.log('Товаров загружено:', state.products.length);
+        console.log('Категорий загружено:', state.categories.length);
+        
+        // Показываем все товары по умолчанию
+        state.currentCategory = null;
+        
         renderCategories();
-        filterAndRenderProducts();
+        renderProducts();
+        updateProductCount();
         
     } catch (error) {
         console.error('Ошибка загрузки:', error);
-        showToast('Ошибка загрузки товаров');
     }
-}
-
-// Получение изображения товара
-function getProductImage(product) {
-    if (product.image_url) return product.image_url;
-    
-    // Ищем изображение в категории
-    const category = state.categories.find(c => c.url === product.category_url);
-    return category?.image_url || 'https://via.placeholder.com/200';
 }
 
 // ============================================
 // КАТЕГОРИИ
 // ============================================
 function renderCategories() {
-    const list = document.getElementById('categoriesList');
+    const grid = document.getElementById('categoriesGrid');
+    
+    // Берем только корневые категории (level 1)
     const rootCategories = state.categories.filter(c => c.level === 1);
     
-    list.innerHTML = `
-        <div class="category-chip ${!state.currentCategory ? 'active' : ''}" onclick="showAllCategories()">
-            Все
-        </div>
-        ${rootCategories.map(cat => `
-            <div class="category-chip ${state.currentCategory === cat.url ? 'active' : ''}" 
+    console.log('Корневые категории:', rootCategories);
+    
+    grid.innerHTML = rootCategories.map(cat => {
+        // Считаем товары в этой категории
+        const productCount = state.products.filter(p => p.category_url === cat.url).length;
+        
+        return `
+            <div class="category-card ${state.currentCategory === cat.url ? 'active' : ''}" 
                  onclick="selectCategory('${cat.url}')">
-                ${cat.name}
+                <div class="category-icon">📦</div>
+                <div class="category-name">${cat.name}</div>
+                <div class="category-count">${productCount} шт</div>
             </div>
-        `).join('')}
-    `;
+        `;
+    }).join('');
 }
 
 // Показать все категории
 window.showAllCategories = function() {
+    console.log('Показать все категории');
     state.currentCategory = null;
-    document.getElementById('currentCategory').textContent = 'Все товары';
+    document.getElementById('currentCategoryTitle').textContent = 'ВСЕ ТОВАРЫ';
     renderCategories();
-    filterAndRenderProducts();
+    renderProducts();
+    updateProductCount();
 };
 
 // Выбрать категорию
 window.selectCategory = function(categoryUrl) {
-    state.currentCategory = categoryUrl;
+    console.log('Выбрана категория:', categoryUrl);
+    
     const category = state.categories.find(c => c.url === categoryUrl);
-    document.getElementById('currentCategory').textContent = category.name;
+    if (!category) return;
+    
+    state.currentCategory = categoryUrl;
+    document.getElementById('currentCategoryTitle').textContent = category.name.toUpperCase();
     renderCategories();
-    filterAndRenderProducts();
+    renderProducts();
+    updateProductCount();
 };
+
+// Обновить счетчик товаров
+function updateProductCount() {
+    let count = state.products.length;
+    if (state.currentCategory) {
+        count = state.products.filter(p => p.category_url === state.currentCategory).length;
+    }
+    document.getElementById('productCount').textContent = `${count} шт`;
+}
 
 // ============================================
 // ТОВАРЫ
 // ============================================
-function filterAndRenderProducts() {
-    let filtered = [...state.products];
+function renderProducts() {
+    const grid = document.getElementById('productsGrid');
+    
+    // Фильтруем товары
+    let filteredProducts = [...state.products];
     
     // Фильтр по категории
     if (state.currentCategory) {
-        filtered = filtered.filter(p => p.category_url === state.currentCategory);
+        filteredProducts = filteredProducts.filter(p => p.category_url === state.currentCategory);
+        console.log(`Товаров в категории ${state.currentCategory}:`, filteredProducts.length);
     }
     
     // Фильтр по поиску
     if (state.searchQuery) {
         const query = state.searchQuery.toLowerCase();
-        filtered = filtered.filter(p => 
+        filteredProducts = filteredProducts.filter(p => 
             p.name.toLowerCase().includes(query) || 
             p.category.toLowerCase().includes(query)
         );
     }
     
-    document.getElementById('productCount').textContent = `${filtered.length} товаров`;
-    renderProducts(filtered);
-}
-
-function renderProducts(products) {
-    const grid = document.getElementById('productsGrid');
+    console.log('Всего товаров для отображения:', filteredProducts.length);
     
-    if (products.length === 0) {
+    if (filteredProducts.length === 0) {
         grid.innerHTML = `
-            <div style="grid-column: span 2; text-align: center; padding: 40px; color: #999;">
-                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-                <p>Товары не найдены</p>
+            <div style="grid-column: span 2; text-align: center; padding: 40px; color: #666;">
+                <div style="font-size: 32px; margin-bottom: 16px;">📦</div>
+                <p>Нет товаров</p>
             </div>
         `;
         return;
     }
     
-    grid.innerHTML = products.map(product => `
-        <div class="product-card" onclick="openProduct('${product.url}')">
-            <div class="product-image">
-                <img src="${product.image}" alt="${product.name}" loading="lazy">
-            </div>
-            <div class="product-info">
-                <div class="product-title">${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''}</div>
-                <div class="product-category">${product.category}</div>
-                <div class="product-footer">
-                    <span class="product-price">${product.price.toLocaleString()} ₽</span>
-                    <button class="add-btn" onclick="addToCart(event, '${product.url}')">
-                        В корзину
-                    </button>
+    grid.innerHTML = filteredProducts.map(product => {
+        // Обрезаем название до 50 символов
+        const shortName = product.name.length > 50 
+            ? product.name.substring(0, 50) + '...' 
+            : product.name;
+        
+        return `
+            <div class="product-card" onclick="openProduct('${product.url}')">
+                <div class="product-image">
+                    <img src="${product.image}" alt="${product.name}" loading="lazy"
+                         onerror="this.src='https://via.placeholder.com/200'">
+                </div>
+                <div class="product-info">
+                    <div class="product-title">${shortName}</div>
+                    <div class="product-category">${product.category}</div>
+                    <div class="product-footer">
+                        <span class="product-price">${product.price.toLocaleString()} ₽</span>
+                        <button class="add-btn" onclick="addToCart(event, '${product.url}')">
+                            +
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // ============================================
-// ТОВАР (детальный просмотр)
+// ТОВАР ДЕТАЛЬНО
 // ============================================
 window.openProduct = function(productUrl) {
+    console.log('Открыть товар:', productUrl);
+    
     const product = state.products.find(p => p.url === productUrl);
     if (!product) return;
     
@@ -320,27 +232,21 @@ window.openProduct = function(productUrl) {
     
     content.innerHTML = `
         <div class="modal-header">
-            <h3>${product.name.substring(0, 30)}${product.name.length > 30 ? '...' : ''}</h3>
-            <span class="close-modal" onclick="closeProductModal()">&times;</span>
+            <h3>${product.category}</h3>
+            <span class="close-modal" onclick="closeProductModal()">✕</span>
         </div>
         <div class="modal-body">
-            <img src="${product.image}" alt="${product.name}" style="width:100%; max-height:200px; object-fit:contain; margin-bottom:16px;">
-            
-            <div style="margin-bottom:16px;">
-                <span style="background:#f0f0f0; padding:4px 12px; border-radius:20px; font-size:12px;">${product.category}</span>
+            <div class="product-detail-image">
+                <img src="${product.image}" alt="${product.name}">
             </div>
-            
-            <p style="font-size:24px; font-weight:600; color:#667eea; margin:20px 0;">
-                ${product.price.toLocaleString()} ₽
-            </p>
-            
-            <p style="color:#666; line-height:1.5; margin-bottom:20px;">
+            <div class="product-detail-category">${product.category}</div>
+            <div class="product-detail-title">${product.name}</div>
+            <div class="product-detail-price">${product.price.toLocaleString()} ₽</div>
+            <div class="product-detail-description">
                 ${product.description || 'Телекоммуникационное оборудование высокого качества. Гарантия 12 месяцев.'}
-            </p>
-            
-            <button class="add-btn" style="width:100%; padding:16px; font-size:16px;" 
-                    onclick="addToCart(event, '${product.url}'); closeProductModal();">
-                Добавить в корзину
+            </div>
+            <button class="product-detail-btn" onclick="addToCart(event, '${product.url}'); closeProductModal();">
+                ДОБАВИТЬ В КОРЗИНУ
             </button>
         </div>
     `;
@@ -353,7 +259,7 @@ window.closeProductModal = function() {
 };
 
 // ============================================
-// КОРЗИНА (имитация)
+// КОРЗИНА
 // ============================================
 window.addToCart = function(event, productUrl) {
     event.stopPropagation();
@@ -372,7 +278,7 @@ window.addToCart = function(event, productUrl) {
     
     updateCartBadge();
     saveCart();
-    showToast('✓ Товар добавлен в корзину');
+    showToast('Товар добавлен');
 };
 
 function updateCartBadge() {
@@ -387,12 +293,10 @@ function updateCartBadge() {
     }
 }
 
-// Сохранение корзины
 function saveCart() {
     localStorage.setItem('olmi_cart', JSON.stringify(state.cart));
 }
 
-// Загрузка корзины
 function loadCart() {
     const saved = localStorage.getItem('olmi_cart');
     if (saved) {
@@ -401,7 +305,6 @@ function loadCart() {
     }
 }
 
-// Открыть корзину
 window.openCart = function() {
     const modal = document.getElementById('cartModal');
     const content = document.getElementById('cartContent');
@@ -410,15 +313,14 @@ window.openCart = function() {
         content.innerHTML = `
             <div class="empty-state">
                 <div class="emoji">🛒</div>
-                <h3 style="margin-bottom:8px;">Корзина пуста</h3>
-                <p style="color:#666;">Добавьте товары из каталога</p>
+                <p>Корзина пуста</p>
             </div>
         `;
     } else {
         const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
         content.innerHTML = `
-            <div style="max-height:400px; overflow-y:auto; margin-bottom:16px;">
+            <div style="max-height: 400px; overflow-y: auto; margin-bottom: 16px;">
                 ${state.cart.map(item => `
                     <div class="cart-item">
                         <div class="cart-item-image">
@@ -428,10 +330,10 @@ window.openCart = function() {
                             <div class="cart-item-title">${item.name.substring(0, 30)}...</div>
                             <div class="cart-item-price">${item.price.toLocaleString()} ₽</div>
                             <div class="cart-item-quantity">
-                                <button class="qty-btn" onclick="updateQuantity('${item.url}', -1)">-</button>
-                                <span>${item.quantity}</span>
+                                <button class="qty-btn" onclick="updateQuantity('${item.url}', -1)">−</button>
+                                <span style="min-width: 20px; text-align: center;">${item.quantity}</span>
                                 <button class="qty-btn" onclick="updateQuantity('${item.url}', 1)">+</button>
-                                <button class="qty-btn" onclick="removeFromCart('${item.url}')" style="color:#ff4757; border-color:#ff4757;">×</button>
+                                <button class="qty-btn" onclick="removeFromCart('${item.url}')" style="margin-left: 8px;">✕</button>
                             </div>
                         </div>
                     </div>
@@ -439,12 +341,12 @@ window.openCart = function() {
             </div>
             
             <div class="cart-total">
-                <span>Итого:</span>
+                <span>ИТОГО</span>
                 <span>${total.toLocaleString()} ₽</span>
             </div>
             
             <button class="checkout-btn" onclick="checkout()">
-                Оформить заказ
+                ОФОРМИТЬ ЗАКАЗ
             </button>
         `;
     }
@@ -452,12 +354,10 @@ window.openCart = function() {
     modal.style.display = 'flex';
 };
 
-// Закрыть корзину
 window.closeCart = function() {
     document.getElementById('cartModal').style.display = 'none';
 };
 
-// Обновить количество
 window.updateQuantity = function(productUrl, delta) {
     const index = state.cart.findIndex(item => item.url === productUrl);
     if (index === -1) return;
@@ -466,26 +366,26 @@ window.updateQuantity = function(productUrl, delta) {
     
     if (newQuantity <= 0) {
         state.cart.splice(index, 1);
+        showToast('Товар удален');
     } else {
         state.cart[index].quantity = newQuantity;
     }
     
     updateCartBadge();
     saveCart();
-    openCart(); // Обновляем отображение
+    openCart();
 };
 
-// Удалить из корзины
 window.removeFromCart = function(productUrl) {
     state.cart = state.cart.filter(item => item.url !== productUrl);
     updateCartBadge();
     saveCart();
-    openCart(); // Обновляем отображение
-    showToast('✓ Товар удален из корзины');
+    openCart();
+    showToast('Товар удален');
 };
 
 // ============================================
-// ОФОРМЛЕНИЕ ЗАКАЗА (имитация)
+// ОФОРМЛЕНИЕ ЗАКАЗА
 // ============================================
 function checkout() {
     if (state.cart.length === 0) {
@@ -495,19 +395,20 @@ function checkout() {
     
     const total = state.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    // Создаем заказ
     const order = {
         id: 'ORD' + Date.now().toString().slice(-8),
         date: new Date().toLocaleString(),
         items: [...state.cart],
-        total: total,
-        status: 'processed'
+        total: total
     };
     
     state.orders.push(order);
     
-    // Имитация отправки в Telegram (для отладки)
-    console.log('Заказ оформлен:', order);
+    // Отправка в Telegram
+    tg.sendData(JSON.stringify({
+        action: 'new_order',
+        order: order
+    }));
     
     // Очищаем корзину
     state.cart = [];
@@ -515,23 +416,68 @@ function checkout() {
     saveCart();
     closeCart();
     
-    // Показываем успешное оформление
-    showToast('✓ Заказ оформлен! Менеджер свяжется с вами');
-    
-    // Если пользователь зарегистрирован, показываем номер заказа
-    if (state.user.registered) {
-        setTimeout(() => {
-            showToast(`Номер заказа: ${order.id}`);
-        }, 1000);
-    }
-    
-    // Имитация отправки данных в Telegram бот
-    tg.sendData(JSON.stringify({
-        action: 'new_order',
-        order: order,
-        user: state.user
-    }));
+    showToast('Заказ оформлен');
 }
+
+// ============================================
+// ПРОФИЛЬ
+// ============================================
+window.openProfile = function() {
+    const modal = document.getElementById('profileModal');
+    const content = document.getElementById('profileContent');
+    
+    const ordersCount = state.orders.length;
+    const totalSpent = state.orders.reduce((sum, order) => sum + order.total, 0);
+    
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="width: 64px; height: 64px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px; color: #888; border: 1px solid #2a2a2a;">
+                OL
+            </div>
+            <h3 style="margin-bottom: 4px; color: #fff;">OLMI CONNECT</h3>
+            <p style="color: #888; font-size: 13px;">оборудование</p>
+        </div>
+        
+        <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: #888;">Заказов:</span>
+                <span style="color: #fff; font-weight: 600;">${ordersCount}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: #888;">Сумма:</span>
+                <span style="color: #fff; font-weight: 600;">${totalSpent.toLocaleString()} ₽</span>
+            </div>
+        </div>
+        
+        <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px;">
+            <h4 style="margin-bottom: 12px; color: #fff; font-size: 14px;">ИСТОРИЯ ЗАКАЗОВ</h4>
+            ${ordersCount > 0 ? state.orders.slice(-3).map(order => `
+                <div style="padding: 8px 0; border-bottom: 1px solid #2a2a2a;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #888; font-size: 13px;">#${order.id}</span>
+                        <span style="color: #fff;">${order.total.toLocaleString()} ₽</span>
+                    </div>
+                    <div style="font-size: 11px; color: #666;">${order.date}</div>
+                </div>
+            `).join('') : '<p style="color: #666; text-align: center;">Нет заказов</p>'}
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
+};
+
+window.closeProfile = function() {
+    document.getElementById('profileModal').style.display = 'none';
+};
+
+// ============================================
+// ПОИСК
+// ============================================
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    state.searchQuery = e.target.value;
+    renderProducts();
+    updateProductCount();
+});
 
 // ============================================
 // УВЕДОМЛЕНИЯ
@@ -547,32 +493,21 @@ function showToast(message) {
 }
 
 // ============================================
-// ПОИСК
-// ============================================
-document.getElementById('searchInput').addEventListener('input', (e) => {
-    state.searchQuery = e.target.value;
-    filterAndRenderProducts();
-});
-
-// ============================================
 // ИНИЦИАЛИЗАЦИЯ
 // ============================================
-function init() {
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Приложение запущено');
     initUser();
     loadCart();
     loadData();
     
-    // Клик по аватарке открывает профиль
-    document.getElementById('userAvatar').addEventListener('click', openProfile);
-    document.getElementById('userName').addEventListener('click', openProfile);
+    // Клик по аватарке
+    document.getElementById('userInfo').addEventListener('click', openProfile);
     
-    // Закрытие модальных окон по клику вне
+    // Закрытие модальных окон
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             e.target.style.display = 'none';
         }
     });
-}
-
-// Запуск приложения
-init();
+});
