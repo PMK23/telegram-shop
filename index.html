@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OLMI Connect Store</title>
+    <title>OLMI CONNECT</title>
     <style>
         * {
             margin: 0;
@@ -13,8 +13,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f8f9fa;
-            color: #2c3e50;
+            background: #0a0a0a;
+            color: #ffffff;
             height: 100vh;
             overflow: hidden;
         }
@@ -23,19 +23,18 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0a0a;
         }
 
-        /* Шапка с профилем */
+        /* Шапка */
         .app-header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: #111111;
             padding: 16px;
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid #2a2a2a;
         }
 
         .user-info {
@@ -47,65 +46,56 @@
         .user-avatar {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border-radius: 50%;
+            background: #2a2a2a;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            color: white;
-            border: 2px solid rgba(255,255,255,0.5);
+            font-size: 18px;
+            color: #ffffff;
+            border: 1px solid #3a3a3a;
         }
 
         .user-name {
             font-weight: 500;
-            font-size: 16px;
+            font-size: 15px;
+            color: #ffffff;
         }
 
         .user-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 8px;
-            border-radius: 20px;
             font-size: 12px;
-            display: inline-block;
-            margin-top: 4px;
+            color: #888;
         }
 
         .cart-icon {
             position: relative;
-            background: rgba(255,255,255,0.2);
+            background: #1a1a1a;
             width: 44px;
             height: 44px;
-            border-radius: 50%;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .cart-icon:active {
-            transform: scale(0.9);
-            background: rgba(255,255,255,0.3);
+            border: 1px solid #2a2a2a;
         }
 
         .cart-badge {
             position: absolute;
             top: -5px;
             right: -5px;
-            background: #ff4757;
+            background: #e74c3c;
             color: white;
-            font-size: 12px;
-            min-width: 20px;
-            height: 20px;
-            border-radius: 10px;
+            font-size: 11px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 4px;
             font-weight: 600;
-            border: 2px solid white;
+            border: 2px solid #0a0a0a;
         }
 
         /* Основной контент */
@@ -113,128 +103,139 @@
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            background: #f8f9fa;
-            border-radius: 20px 20px 0 0;
-            margin-top: -10px;
+            background: #0a0a0a;
         }
 
         /* Поиск */
         .search-container {
-            position: sticky;
-            top: 0;
-            background: #f8f9fa;
-            padding: 16px 0;
-            z-index: 10;
+            margin-bottom: 24px;
         }
 
         .search-box {
-            background: white;
-            border-radius: 30px;
-            padding: 12px 20px;
+            background: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
 
         .search-box input {
             flex: 1;
             border: none;
             outline: none;
-            font-size: 16px;
+            font-size: 15px;
             background: transparent;
+            color: #ffffff;
         }
 
         .search-box input::placeholder {
-            color: #aaa;
+            color: #555;
         }
 
         .search-icon {
-            color: #667eea;
-            font-size: 20px;
+            color: #666;
+            font-size: 18px;
         }
 
-        /* Категории */
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 20px 0 12px 0;
+        /* Заголовки */
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 16px;
         }
 
-        .view-all {
-            color: #667eea;
-            font-size: 14px;
-            font-weight: 500;
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
         }
 
-        .categories-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 4px 0 12px 0;
-            scrollbar-width: none;
-        }
-
-        .categories-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        .category-chip {
-            background: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 500;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-            transition: all 0.2s;
+        .section-link {
+            color: #888;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             cursor: pointer;
         }
 
-        .category-chip.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+        /* Категории */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
         }
 
-        .category-chip:active {
-            transform: scale(0.95);
+        .category-card {
+            background: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        /* Сетка товаров */
+        .category-card.active {
+            background: #1a1a1a;
+            border-color: #4a4a4a;
+        }
+
+        .category-card:active {
+            background: #1a1a1a;
+        }
+
+        .category-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #888;
+        }
+
+        .category-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .category-count {
+            font-size: 10px;
+            color: #888;
+        }
+
+        /* Товары */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            padding-bottom: 20px;
         }
 
         .product-card {
-            background: white;
-            border-radius: 16px;
+            background: #111111;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s;
-            border: 1px solid #f0f0f0;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .product-card:active {
+            background: #1a1a1a;
             transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .product-image {
             height: 140px;
-            background: #f8f9fa;
+            background: #1a1a1a;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 12px;
+            border-bottom: 1px solid #2a2a2a;
         }
 
         .product-image img {
@@ -248,23 +249,24 @@
         }
 
         .product-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             margin-bottom: 4px;
+            color: #ffffff;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            height: 40px;
+            height: 36px;
+            line-height: 1.4;
         }
 
         .product-category {
-            font-size: 11px;
-            color: #999;
+            font-size: 10px;
+            color: #888;
             margin-bottom: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .product-footer {
@@ -276,29 +278,29 @@
 
         .product-price {
             font-size: 16px;
-            font-weight: 700;
-            color: #667eea;
+            font-weight: 600;
+            color: #ffffff;
         }
 
         .add-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 8px 16px;
-            font-size: 12px;
+            background: transparent;
+            color: #ffffff;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 11px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .add-btn:active {
-            transform: scale(0.95);
-            opacity: 0.9;
+            background: #2a2a2a;
         }
 
-        /* Модальное окно */
+        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
@@ -306,58 +308,56 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.9);
             z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
+            align-items: flex-end;
         }
 
         .modal-content {
-            background: white;
-            border-radius: 24px;
-            max-width: 100%;
+            background: #111111;
+            width: 100%;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
             max-height: 90%;
             overflow-y: auto;
-            position: relative;
             animation: slideUp 0.3s ease;
+            border: 1px solid #2a2a2a;
         }
 
         @keyframes slideUp {
             from {
-                transform: translateY(50px);
-                opacity: 0;
+                transform: translateY(100%);
             }
             to {
                 transform: translateY(0);
-                opacity: 1;
             }
         }
 
         .modal-header {
             padding: 20px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #2a2a2a;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .modal-header h3 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
+            color: #ffffff;
         }
 
         .close-modal {
             font-size: 24px;
-            color: #999;
+            color: #666;
             cursor: pointer;
             width: 40px;
             height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            background: #f5f5f5;
+            border-radius: 8px;
+            background: #1a1a1a;
         }
 
         .modal-body {
@@ -369,16 +369,17 @@
             display: flex;
             gap: 12px;
             padding: 12px;
-            background: #f8f9fa;
-            border-radius: 12px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
             margin-bottom: 8px;
         }
 
         .cart-item-image {
             width: 60px;
             height: 60px;
-            background: white;
-            border-radius: 8px;
+            background: #111111;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -395,15 +396,16 @@
         }
 
         .cart-item-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             margin-bottom: 4px;
+            color: #ffffff;
         }
 
         .cart-item-price {
             font-size: 14px;
             font-weight: 600;
-            color: #667eea;
+            color: #ffffff;
         }
 
         .cart-item-quantity {
@@ -416,50 +418,57 @@
         .qty-btn {
             width: 30px;
             height: 30px;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+            background: transparent;
+            border-radius: 4px;
             font-size: 16px;
             cursor: pointer;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .qty-btn:active {
-            background: #f0f0f0;
+            background: #2a2a2a;
         }
 
         .cart-total {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 8px;
             margin-top: 20px;
             display: flex;
             justify-content: space-between;
             font-size: 18px;
             font-weight: 600;
+            color: #ffffff;
         }
 
         .checkout-btn {
-            background: white;
-            color: #667eea;
+            background: #ffffff;
+            color: #0a0a0a;
             border: none;
-            border-radius: 30px;
+            border-radius: 8px;
             padding: 16px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             width: 100%;
             margin-top: 16px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .checkout-btn:active {
+            background: #f0f0f0;
         }
 
         .empty-state {
             text-align: center;
             padding: 40px 20px;
-            color: #999;
+            color: #666;
         }
 
         .empty-state .emoji {
@@ -468,19 +477,26 @@
             opacity: 0.5;
         }
 
+        .empty-state p {
+            color: #888;
+            font-size: 14px;
+        }
+
         /* Уведомления */
         .toast {
             position: fixed;
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
+            background: #1a1a1a;
+            color: #ffffff;
             padding: 12px 24px;
-            border-radius: 30px;
+            border-radius: 8px;
             font-size: 14px;
             z-index: 2000;
             animation: fadeInOut 2s ease;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
         @keyframes fadeInOut {
@@ -489,18 +505,82 @@
             85% { opacity: 1; transform: translate(-50%, 0); }
             100% { opacity: 0; transform: translate(-50%, -20px); }
         }
+
+        /* Товар детально */
+        .product-detail-image {
+            width: 100%;
+            height: 200px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .product-detail-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .product-detail-category {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .product-detail-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+
+        .product-detail-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .product-detail-description {
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .product-detail-btn {
+            background: #ffffff;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div id="app">
-        <!-- Шапка с профилем -->
+        <!-- Шапка -->
         <div class="app-header">
             <div class="user-info" id="userInfo">
-                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-avatar" id="userAvatar">OL</div>
                 <div>
-                    <div class="user-name" id="userName">Гость</div>
-                    <div class="user-badge" id="userStatus">не авторизован</div>
+                    <div class="user-name" id="userName">OLMI CONNECT</div>
+                    <div class="user-badge" id="userStatus">оборудование</div>
                 </div>
             </div>
             <div class="cart-icon" id="cartIcon" onclick="openCart()">
@@ -515,21 +595,21 @@
             <div class="search-container">
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Поиск товаров...">
+                    <input type="text" id="searchInput" placeholder="Поиск оборудования...">
                 </div>
             </div>
 
             <!-- Категории -->
-            <div class="section-title">
-                <span>Категории</span>
-                <span class="view-all" onclick="showAllCategories()">Все</span>
+            <div class="section-header">
+                <span class="section-title">КАТЕГОРИИ</span>
+                <span class="section-link" onclick="showAllCategories()">ВСЕ</span>
             </div>
-            <div class="categories-scroll" id="categoriesList"></div>
+            <div class="categories-grid" id="categoriesGrid"></div>
 
             <!-- Товары -->
-            <div class="section-title">
-                <span id="currentCategory">Все товары</span>
-                <span class="view-all" id="productCount"></span>
+            <div class="section-header">
+                <span class="section-title" id="currentCategoryTitle">ВСЕ ТОВАРЫ</span>
+                <span class="section-link" id="productCount"></span>
             </div>
             <div class="products-grid" id="productsGrid"></div>
         </main>
@@ -537,34 +617,33 @@
 
     <!-- Модальное окно товара -->
     <div id="productModal" class="modal">
-        <div class="modal-content" id="productModalContent">
-            <!-- Заполняется через JS -->
-        </div>
+        <div class="modal-content" id="productModalContent"></div>
     </div>
 
     <!-- Модальное окно корзины -->
     <div id="cartModal" class="modal">
-        <div class="modal-content" style="width: 100%;">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3>Корзина</h3>
-                <span class="close-modal" onclick="closeCart()">&times;</span>
+                <h3>КОРЗИНА</h3>
+                <span class="close-modal" onclick="closeCart()">✕</span>
             </div>
             <div class="modal-body" id="cartContent">
-                <!-- Заполняется через JS -->
+                <div class="empty-state">
+                    <div class="emoji">🛒</div>
+                    <p>Корзина пуста</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Модальное окно профиля -->
     <div id="profileModal" class="modal">
-        <div class="modal-content" style="width: 100%;">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3>Профиль</h3>
-                <span class="close-modal" onclick="closeProfile()">&times;</span>
+                <h3>ПРОФИЛЬ</h3>
+                <span class="close-modal" onclick="closeProfile()">✕</span>
             </div>
-            <div class="modal-body" id="profileContent">
-                <!-- Заполняется через JS -->
-            </div>
+            <div class="modal-body" id="profileContent"></div>
         </div>
     </div>
 
